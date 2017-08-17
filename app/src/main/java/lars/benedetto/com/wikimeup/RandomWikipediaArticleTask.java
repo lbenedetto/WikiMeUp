@@ -69,8 +69,11 @@ class RandomWikipediaArticleTask extends AsyncTask<Void, Void, Void> {
         int fileID = context.getResources().getIdentifier("links", "raw", context.getPackageName());
         ArrayList<String> articles = readInput(context.getResources().openRawResource(fileID));
         int i = new Random().nextInt(articles.size());
-        link = articles.get(i);
-        article = getText(link);
+        article ="";
+        while(article.isEmpty()){
+            link = articles.get(i);
+            article = getText(link);
+        }
         context.runOnUiThread(runnable);
         return null;
     }
