@@ -14,7 +14,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static PendingIntent[] pendingIntents = new PendingIntent[7];
     private TextView textViewTime;
     private Activity context = this;
-    private CheckBox[] boxes;
+    private ImageCheckBox[] boxes;
     private boolean[] repeatDay = new boolean[7];
     private AlarmManager alarmManager;
     private SharedPreferences sharedPreferences;
@@ -54,14 +53,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        boxes = new CheckBox[]{
-                (CheckBox) findViewById(R.id.checkBoxSunday),
-                (CheckBox) findViewById(R.id.checkBoxMonday),
-                (CheckBox) findViewById(R.id.checkBoxTuesday),
-                (CheckBox) findViewById(R.id.checkBoxWednesday),
-                (CheckBox) findViewById(R.id.checkBoxThursday),
-                (CheckBox) findViewById(R.id.checkBoxFriday),
-                (CheckBox) findViewById(R.id.checkBoxSaturday)
+        boxes = new ImageCheckBox[]{
+                (ImageCheckBox) findViewById(R.id.checkBoxSunday),
+                (ImageCheckBox) findViewById(R.id.checkBoxMonday),
+                (ImageCheckBox) findViewById(R.id.checkBoxTuesday),
+                (ImageCheckBox) findViewById(R.id.checkBoxWednesday),
+                (ImageCheckBox) findViewById(R.id.checkBoxThursday),
+                (ImageCheckBox) findViewById(R.id.checkBoxFriday),
+                (ImageCheckBox) findViewById(R.id.checkBoxSaturday)
         };
         sharedPreferences = getSharedPreferences("alarm_data", MODE_PRIVATE);
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -165,23 +164,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setAlarm(Calendar calendar, int alarmCode) {
+    private long setAlarm(Calendar calendar, int alarmCode) {
         Intent intent = new Intent(context, AlarmReceiver.class);
         intent.setAction("lars.benedetto.com.wikimeup.alarmTrigger");
         pendingIntents[alarmCode] = PendingIntent.getBroadcast(context, alarmCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntents[alarmCode]);
-        long seconds = (calendar.getTimeInMillis() - System.currentTimeMillis()) / 1000;
-//                long minutes = seconds / 60;
-//                long hours = minutes / 60;
-//                long days = hours / 24;
-        if (seconds < 1000)
-            Toast.makeText(this, "Alarm set for " + seconds, Toast.LENGTH_LONG).show();
+        return (calendar.getTimeInMillis() - System.currentTimeMillis()) / 1000;//seconds
+
     }
 
     private void setAlarm(int hour, int minute) {
-        //TODO: Non repeating alarm
         enableBootReceiver();
         Calendar calendar = Calendar.getInstance();
+        long seconds = Long.MAX_VALUE;
         for (int alarmCode = 0; alarmCode < 7; alarmCode++) {
             if (repeatDay[alarmCode]) {
                 calendar.setTimeInMillis(System.currentTimeMillis());
@@ -193,15 +188,26 @@ public class MainActivity extends AppCompatActivity {
                 if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
                     calendar.add(Calendar.DAY_OF_YEAR, 7);
                 }
-                setAlarm(calendar, alarmCode);
+                long sec = setAlarm(calendar, alarmCode);
+                if (sec < seconds) seconds = sec;
             }
         }
+        long minutes = seconds / 60;
+        seconds = seconds % 60;
+        long hours = minutes / 60;
+        minutes = minutes % 60;
+        long days = hours / 24;
+        hours = hours % 24;
+        Toast.makeText(this, String.format(Locale.ENGLISH, "Alarm set to go off in T-%02d:%02d:%02d:%02ds",days,hours,minutes,seconds), Toast.LENGTH_LONG).show();
 
     }
 
     private void cancelAlarm() {
         disableBootReceiver();
+        if (alarmManager == null) return;
         for (int i = 0; i < 7; i++) {
+            PendingIntent intent = pendingIntents[i];
+            if (intent == null) return;
             alarmManager.cancel(pendingIntents[i]);
         }
     }

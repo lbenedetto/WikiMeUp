@@ -9,14 +9,13 @@ import android.widget.Button;
 
 import im.delight.android.webview.AdvancedWebView;
 
-public class ReadArticleActivty extends AppCompatActivity implements AdvancedWebView.Listener {
-    private ReadArticleActivty context;
+public class ReadArticleActivity extends AppCompatActivity implements AdvancedWebView.Listener {
     private AdvancedWebView webView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reader);
-        context = this;
+        ReadArticleActivity context = this;
         final Voice voice = new Voice(context);
 
         final Button buttonStop = (Button) findViewById(R.id.buttonStop);
