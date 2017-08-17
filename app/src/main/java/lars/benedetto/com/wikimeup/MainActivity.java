@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis() + 2000);
                 setAlarm(calendar, 0);
+                Toast.makeText(context, "Loading...", Toast.LENGTH_LONG).show();
             }
         });
     }

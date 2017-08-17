@@ -36,14 +36,18 @@ class Voice implements TextToSpeech.OnInitListener {
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             String[] tokens = tokenize(text, getMaxSpeechInputLength());
-            for (String token : tokens) {
-                Log.i("Voice", token);
-                tts.speak(token, TextToSpeech.QUEUE_ADD, null, null);
+            tts.speak(tokens[0], TextToSpeech.QUEUE_FLUSH, null, null);
+            for (int j = 1; j < tokens.length; j++) {
+                Log.i("Voice", tokens[i]);
+                tts.speak(tokens[i], TextToSpeech.QUEUE_ADD, null, null);
             }
         } else {
             String[] tokens = tokenize(text, 3000);
-            for (String token : tokens)
-                tts.speak(token, TextToSpeech.QUEUE_ADD, null);
+            tts.speak(tokens[0], TextToSpeech.QUEUE_FLUSH, null);
+            for (int j = 1; j < tokens.length; j++) {
+                Log.i("Voice", tokens[i]);
+                tts.speak(tokens[i], TextToSpeech.QUEUE_ADD, null);
+            }
         }
     }
 
